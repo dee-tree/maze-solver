@@ -57,10 +57,10 @@ class Maze private constructor(
             BORDER_CELL -> Cell.WallCell(row, column)
             START_CELL -> Cell.StartCell(row, column)
             FINISH_CELL -> Cell.FinishCell(row, column)
-            else -> throw IllegalArgumentException("this char [$this] is not compatible with cells mapping!")
+            else -> throw InvalidDataException()
         }
 
-        @Throws(InvalidMazeDoorsCountException::class, InvalidMazeSizeException::class)
+        @Throws(InvalidMazeDoorsCountException::class, InvalidMazeSizeException::class, InvalidDataException::class)
         fun fromFile(filename: String): Maze {
             val file = File(filename)
 
@@ -142,4 +142,5 @@ class Maze private constructor(
 open class MazeException() : Exception()
 open class InvalidMazeFileFormatException() : MazeException()
 class InvalidMazeSizeException() : InvalidMazeFileFormatException()
+class InvalidDataException() : InvalidMazeFileFormatException()
 class InvalidMazeDoorsCountException() : InvalidMazeFileFormatException()
