@@ -4,6 +4,8 @@ import org.jetbrains.annotations.TestOnly
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import java.io.File
+import java.nio.file.Files
+import javax.swing.filechooser.FileSystemView
 import kotlin.test.assertFailsWith
 
 class MazeTest {
@@ -139,6 +141,37 @@ class MazeTest {
         assertFailsWith<InvalidMazeDoorsCountException>(message = "Multiple finishes") {
             Maze.fromFile(input.absolutePath)
         }
+
+        input.delete()
+    }
+
+    @Test
+    fun testSolve() {
+        val input = File("input")
+        input.writeText(
+            """
+                1111111
+                0100111
+                0F00011
+                1111011
+                S000011
+            """.trimIndent()
+        )
+
+        val maze = Maze.fromFile(input.absolutePath)
+        val solver = MazeSolver(maze)
+
+        val list = solver.solve()
+
+        println("list: ${list}")
+
+        var current: Maze.Cell
+
+        do {
+            current = solver.next()
+            println("Next: $current")
+        } while (current !is Maze.Cell.FinishCell)
+
 
         input.delete()
     }

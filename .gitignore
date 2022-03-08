@@ -1,5 +1,7 @@
 /build/
 /out/
 /solver/build/
+/app/build/
+/app/out/
 /solver/out/
 /.gradle/

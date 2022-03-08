@@ -15,6 +15,8 @@ class Maze private constructor(
 
         operator fun get(direction: Directions) = neighbours[direction]
 
+        val allNeighbours: List<Cell> get() = neighbours.values.mapNotNull { it }
+
         fun addNeighbour(direction: Directions, neighbour: Cell) {
             neighbours[direction] = neighbour
         }
@@ -24,7 +26,7 @@ class Maze private constructor(
 
         }
 
-        class BorderCell(row: Int, column: Int): Cell(row, column) {
+        class WallCell(row: Int, column: Int): Cell(row, column) {
 
         }
 
@@ -35,6 +37,8 @@ class Maze private constructor(
         class FinishCell(row: Int, column: Int): Cell(row, column) {
 
         }
+
+        override fun toString(): String = "${this::class.simpleName}(row=${row}, column=${column})"
     }
 
     enum class Directions {
@@ -50,12 +54,13 @@ class Maze private constructor(
 
         private fun Char.toCell(row: Int, column: Int): Cell = when(this) {
             ROAD_CELL -> Cell.RoadCell(row, column)
-            BORDER_CELL -> Cell.BorderCell(row, column)
+            BORDER_CELL -> Cell.WallCell(row, column)
             START_CELL -> Cell.StartCell(row, column)
             FINISH_CELL -> Cell.FinishCell(row, column)
             else -> throw IllegalArgumentException("this char [$this] is not compatible with cells mapping!")
         }
 
+        @Throws(InvalidMazeDoorsCountException::class, InvalidMazeSizeException::class)
         fun fromFile(filename: String): Maze {
             val file = File(filename)
 
@@ -101,8 +106,40 @@ class Maze private constructor(
             return Maze(rows, columns, startCell!!)
         }
     }
+
+    fun traverseAll(action: (Cell) -> Unit) {
+        action(start)
+        start.traverse(action)
+
+    }
+
+    private fun Cell.traverse(action: (Cell) -> Unit) {
+        val queue = LinkedList<Cell>()
+        val visited: MutableMap<Cell, Cell?> = hashMapOf()
+
+        visited[this] = null
+
+        var current = this
+        while (visited.size != rows * columns) {
+            val neighbours = current.allNeighbours
+
+            for (neighbour in neighbours) {
+                if (!visited.containsKey(neighbour)) {
+                    visited[neighbour] = current
+                    queue.add(neighbour)
+                    action(neighbour)
+                }
+            }
+
+            if (queue.isEmpty())
+                throw NoFinishCellException()
+            current = queue.remove()
+        }
+    }
+
 }
 
-open class InvalidMazeFileFormatException() : Exception()
+open class MazeException() : Exception()
+open class InvalidMazeFileFormatException() : MazeException()
 class InvalidMazeSizeException() : InvalidMazeFileFormatException()
 class InvalidMazeDoorsCountException() : InvalidMazeFileFormatException()

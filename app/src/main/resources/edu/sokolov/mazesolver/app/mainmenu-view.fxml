@@ -4,11 +4,12 @@
 
 <?import javafx.scene.control.Button?>
 <VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml"
-    fx:controller="edu.sokolov.mazesolver.HelloController">
+    fx:controller="edu.sokolov.mazesolver.app.MainMenuController">
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
     </padding>
 
-    <Label fx:id="welcomeText" />
-    <Button text="Hello!" onAction="#onHelloButtonClick" />
+    <Label text="Maze So!ver" alignment="CENTER" style="-fx-text-fill: #745ebd; -fx-font-size: 32"/>
+    <Button text="Solve the maze" onAction="#onSolveMazeButtonClick" />
+    <Button text="Configure maze" onAction="#onConfigureMazeButtonClick" />
 </VBox>

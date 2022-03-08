@@ -1,8 +1,8 @@
 plugins {
     kotlin("jvm") version "1.6.10"
-    application
-    id("org.openjfx.javafxplugin") version "0.0.10"
-    id("org.beryx.jlink") version "2.24.1"
+//    application
+//    id("org.openjfx.javafxplugin") version "0.0.10"
+//    id("org.beryx.jlink") version "2.24.1"
 }
 
 group = "edu.sokolov"
@@ -12,31 +12,31 @@ repositories {
     mavenCentral()
 }
 
-application {
-    mainClass.set("edu.sokolov.mazesolver.HelloApplication")
-}
+//application {
+//    mainClass.set("edu.sokolov.mazesolver.HelloApplication")
+//}
+//
+//javafx {
+//    version = "14.0.2.1"
+//    modules("javafx.controls", "javafx.fxml")
+//}
 
-javafx {
-    version = "14.0.2.1"
-    modules("javafx.controls", "javafx.fxml")
-}
+//dependencies {
+//    implementation(kotlin("stdlib"))
+//    testImplementation(kotlin("test"))
+//
+//    implementation("org.controlsfx:controlsfx:11.1.1")
+//    implementation("com.dlsc.formsfx:formsfx-core:11.4.2") {
+//        exclude(group = "org.openjfx")
+//    }
+//    implementation("net.synedra:validatorfx:0.2.1") {
+//        exclude(group = "org.openjfx")
+//    }
+//}
 
-dependencies {
-    implementation(kotlin("stdlib"))
-    testImplementation(kotlin("test"))
-
-    implementation("org.controlsfx:controlsfx:11.1.1")
-    implementation("com.dlsc.formsfx:formsfx-core:11.4.2") {
-        exclude(group = "org.openjfx")
-    }
-    implementation("net.synedra:validatorfx:0.2.1") {
-        exclude(group = "org.openjfx")
-    }
-}
-
-tasks.test {
-    useJUnitPlatform()
-}
+//tasks.test {
+//    useJUnitPlatform()
+//}
 
 /*
 
