@@ -1,24 +1,28 @@
 package edu.sokolov.maze
 
-import java.util.LinkedList
 import edu.sokolov.maze.Maze.Cell
-import edu.sokolov.maze.Maze.Cell.StartCell
-import edu.sokolov.maze.Maze.Cell.FinishCell
-import edu.sokolov.maze.Maze.Cell.WallCell
-import java.util.Queue
+import java.util.*
 
-
+/**
+ * Класс, описывающий решатель лабиринта `maze`
+ */
 class MazeSolver(val maze: Maze) {
 
 
+    /**
+     * Решает лабиринт (т.е. находит путь от старта до финиша), возвращает список из `Cell`, лежащих на этом пути
+     */
     fun solve() = maze.start.findFinish()
 
     private lateinit var current: Cell
-    private val currentNeighbours: Queue<Cell> = LinkedList()
+    private val currentNeighbours = PriorityQueue<Cell>(compareBy { it.measureMetrics() })
 
     private val visited: MutableMap<Cell, Cell?> = hashMapOf()
-    private val queue: Queue<Cell> = LinkedList()
+    private val queue = PriorityQueue<Cell>(compareBy { it.measureMetrics() })
 
+    /**
+     * Возвращает ячейку, которая является следующей при проходе по лабиринту
+     */
     fun next(): Cell {
         if (!this::current.isInitialized) {
             current = maze.start
@@ -27,13 +31,16 @@ class MazeSolver(val maze: Maze) {
         }
         visited[current] = null
 
-        if (current !is FinishCell) {
+        // Проверка, найден ли финиш
+        if (current.kind != Maze.CellKind.FINISH) {
+            // заполнение всех текущих соседей
             if (currentNeighbours.isEmpty()) {
                 currentNeighbours.addAll(current.allNeighbours)
             }
 
-            val neighbour = currentNeighbours.remove()
-            if (!visited.containsKey(neighbour) && neighbour !is WallCell) {
+            // Получение самого приоритетного соседа
+            val neighbour = currentNeighbours.poll()
+            if (!visited.containsKey(neighbour) && neighbour.kind != Maze.CellKind.BORDER) {
                 visited[neighbour] = current
                 queue.add(neighbour)
             }
@@ -43,7 +50,7 @@ class MazeSolver(val maze: Maze) {
 
             if (queue.isEmpty())
                 throw NoFinishCellException()
-            current = queue.remove()
+            current = queue.poll()
         }
 
         return current
@@ -52,7 +59,7 @@ class MazeSolver(val maze: Maze) {
     fun path(): Queue<Cell> {
         val path = LinkedList<Cell>()
         path.addFirst(current)
-        while (current !is StartCell) {
+        while (current.kind != Maze.CellKind.START) {
             current = visited[current]!!
             path.addFirst(current)
         }
@@ -61,17 +68,18 @@ class MazeSolver(val maze: Maze) {
 }
 
 fun Cell.findFinish(): List<Cell> {
-    val queue = LinkedList<Cell>()
+    val queue = PriorityQueue<Cell>(compareBy { it.measureMetrics() })
     val visited: MutableMap<Cell, Cell?> = hashMapOf()
 
     visited[this] = null
 
     var current = this
-    while (current !is FinishCell) {
+    while (current.kind != Maze.CellKind.FINISH) {
         val neighbours = current.allNeighbours
 
-        for (neighbour in neighbours) {
-            if (!visited.containsKey(neighbour) && neighbour !is WallCell) {
+        // Обход соседей
+        for (neighbour in neighbours.sortedBy { it.measureMetrics() }) {
+            if (!visited.containsKey(neighbour) && neighbour.kind != Maze.CellKind.BORDER) {
                 visited[neighbour] = current
                 queue.add(neighbour)
             }
@@ -79,9 +87,10 @@ fun Cell.findFinish(): List<Cell> {
 
         if (queue.isEmpty())
             throw NoFinishCellException()
-        current = queue.remove()
+        current = queue.poll()
     }
 
+    // восстановление пройденного пути
     val path = LinkedList<Cell>()
     path.addFirst(current)
     while (current != this) {

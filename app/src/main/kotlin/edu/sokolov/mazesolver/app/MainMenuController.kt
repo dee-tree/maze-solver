@@ -24,7 +24,7 @@ class MainMenuController {
 
     @FXML
     private fun onSolveMazeButtonClick() {
-
+        // Если не выбран файл с конфигурацией лабиринта, то выдаем пользователю ошибку
         if (!currentMazeConfigFile.isFile) {
             Alert(AlertType.ERROR).apply {
                 title = "Oops!"
@@ -35,6 +35,18 @@ class MainMenuController {
             return
         }
 
+        // Если не выбран способ решения лабиринта, выдаем пользователю ошибку
+        if (mazeMetrics == null) {
+            Alert(AlertType.ERROR).apply {
+                title = "Oops!"
+                contentText = "You must set solution way before this action!"
+                showAndWait()
+            }
+
+            return
+        }
+
+        // Запуск окна с решателем лабиринта
         val fxmlLoader = FXMLLoader(MainMenuController::class.java.getResource("maze-solver-view.fxml"))
         val root = fxmlLoader.load<Parent>()
         val stage = Stage()

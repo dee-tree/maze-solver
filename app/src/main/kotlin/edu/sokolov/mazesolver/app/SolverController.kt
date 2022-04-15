@@ -10,6 +10,7 @@ import javafx.fxml.FXML
 import javafx.scene.control.Alert
 import javafx.scene.control.Button
 import javafx.scene.control.Label
+import javafx.scene.control.ToggleGroup
 import javafx.scene.layout.GridPane
 import java.util.*
 import kotlin.concurrent.timerTask
@@ -64,8 +65,12 @@ class SolverController {
             currentSpeed -= speedStep
     }
 
+    /**
+     * Вызывается при нажатии на кнопку "старт"
+     */
     @FXML
     private fun onStartButtonClick() {
+        // Запускается таймер, который для выбранной скорости решения открывает новые шаги решения
         start.isDisable = true
         timer = Timer("maze-solver").apply {
             schedule(
@@ -78,6 +83,9 @@ class SolverController {
         pause.isDisable = false
     }
 
+    /**
+     * Вызывается при нажатии на кнопку "пауза". Останавливает таймер
+     */
     @FXML
     private fun onPauseButtonClick() {
         pause.isDisable = true
@@ -103,23 +111,34 @@ class SolverController {
             return
         }
 
+        // окрашивает текущую ячейку в данном шаге решения.
+        // ячейку BORDER - в серый цвет, ROAD - в желтый цвет, START и FINISH - в зеленый.
         mazeGrid.children.find { (it as CellPane).row == nextCell.row && it.column == nextCell.column }?.style =
-            "-fx-background-color:" + when (nextCell) {
-                is Maze.Cell.WallCell -> "gray"
-                is Maze.Cell.RoadCell -> "yellow"
-                is Maze.Cell.StartCell -> "green"
-                is Maze.Cell.FinishCell -> "green"
+            "-fx-background-color:" + when (nextCell.kind) {
+                Maze.CellKind.BORDER -> "gray"
+                Maze.CellKind.ROAD -> "yellow"
+                Maze.CellKind.START -> "green"
+                Maze.CellKind.FINISH -> "green"
             }
 
-        if (nextCell is Maze.Cell.FinishCell) {
+        // если найден финиш, то завершаем решение
+        if (nextCell.kind == Maze.CellKind.FINISH) {
             stop(StopReasons.COMPLETED)
         }
     }
 
+    /**
+     * Причины остановки решателя
+     *  * COMPLETED - лабиринт пройден
+     *  * NOFINISH - отсутствие достигаемости финиша в лабиринте
+     */
     private enum class StopReasons {
         COMPLETED, NOFINISH
     }
 
+    /**
+     * Останавливает решатель и выдает сообщение пользователю в зависимости от причины остановки решателя
+     */
     private fun stop(reason: StopReasons) {
         onPauseButtonClick()
         start.isDisable = true
@@ -146,11 +165,11 @@ class SolverController {
 
     @FXML
     private fun initialize() {
-
+        // Инициализация скорости
         stepSpeed.text = currentSpeed.toString()
-
-        maze = Maze.fromFile(currentMazeConfigFile.absolutePath)
-
+        // инициализация лабиринта
+        maze = Maze.fromFile(currentMazeConfigFile.absolutePath, mazeMetrics!!)
+        // задание ячеек лабиринта на UI
         maze.traverseAll { cell ->
             mazeGrid.add(cell.toView(), cell.column, cell.row)
         }

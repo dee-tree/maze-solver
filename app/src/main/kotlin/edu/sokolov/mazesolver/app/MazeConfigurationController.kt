@@ -1,11 +1,15 @@
 package edu.sokolov.mazesolver.app
 
+import edu.sokolov.maze.ConstMetrics
 import edu.sokolov.maze.InvalidMazeFileFormatException
 import edu.sokolov.maze.Maze
+import edu.sokolov.maze.SquaredManhattan
 import edu.sokolov.mazesolver.app.view.toView
 import javafx.fxml.FXML
 import javafx.scene.control.Alert
 import javafx.scene.control.Label
+import javafx.scene.control.RadioButton
+import javafx.scene.control.ToggleGroup
 import javafx.scene.layout.GridPane
 import javafx.stage.FileChooser
 import javafx.stage.Stage
@@ -21,6 +25,7 @@ class MazeConfigurationController {
 
         const val minRows = 2
         const val minColumns = 2
+
     }
 
     @FXML
@@ -45,33 +50,17 @@ class MazeConfigurationController {
             field = value
         }
 
-    @FXML
-    private fun onIncreaseMazeRowsButtonClick() {
-        if (rows < maxRows)
-            rows++
-    }
+    private lateinit var solutionWayGroup: ToggleGroup
 
     @FXML
-    private fun onDecreaseMazeRowsButtonClick() {
-        if (rows > minRows)
-            rows--
-    }
+    private lateinit var breadthFirstSearch: RadioButton
 
     @FXML
-    private fun onIncreaseMazeColumnsButtonClick() {
-        if (columns < maxColumns)
-            columns++
-    }
-
-    @FXML
-    private fun onDecreaseMazeColumnsButtonClick() {
-        if (columns > minColumns)
-            columns--
-    }
-
+    private lateinit var astar: RadioButton
 
     @FXML
     private fun onLoadConfigurationFromFileButtonClick() {
+        // выбор файла системными средствами
         val chooser = FileChooser().apply {
             title = "Choose text file with maze configuration"
             extensionFilters.add(FileChooser.ExtensionFilter("Maze configuration", "*.mz"))
@@ -83,7 +72,7 @@ class MazeConfigurationController {
             val maze: Maze
 
             try {
-                maze = Maze.fromFile(it.absolutePath)
+                maze = Maze.fromFile(it.absolutePath, SquaredManhattan())
             } catch (e: InvalidMazeFileFormatException) {
                 Alert(Alert.AlertType.ERROR).apply {
                     title = "Error loading maze from file"
@@ -106,11 +95,22 @@ class MazeConfigurationController {
     @FXML
     private fun onSaveConfigButtonClick() {
         (mazeGrid.scene.window as Stage).close()
+
+        // определение выбранного способа решения (метрики)
+        // если выбрано выделение на Radio button "breadthFirstSearch", то устанавливается поиск в ширину
+        // если выбрано выделение на Radio button "astar", то устанавливается поиск по алгоритму A*
+        mazeMetrics = when (solutionWayGroup.selectedToggle as RadioButton) {
+            breadthFirstSearch -> ConstMetrics()
+            astar -> SquaredManhattan()
+            else -> error("unreachable metrics state")
+        }
     }
 
     @FXML
     fun initialize() {
         mazeColumns.text = columns.toString()
         mazeRows.text = rows.toString()
+
+        solutionWayGroup = breadthFirstSearch.toggleGroup
     }
 }

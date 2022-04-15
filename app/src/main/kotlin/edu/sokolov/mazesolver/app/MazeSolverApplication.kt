@@ -5,6 +5,9 @@ import javafx.fxml.FXMLLoader
 import javafx.scene.Scene
 import javafx.stage.Stage
 
+/**
+ * Класс, описывающий GUI приложение решателя лабиринта
+ */
 class MazeSolverApplication : Application() {
     override fun start(stage: Stage) {
         val fxmlLoader = FXMLLoader(MazeSolverApplication::class.java.getResource("mainmenu-view.fxml"))
@@ -15,6 +18,9 @@ class MazeSolverApplication : Application() {
     }
 }
 
+/**
+ * Начальная точка запуска приложения
+ */
 fun main() {
     Application.launch(MazeSolverApplication::class.java)
 }
